@@ -9,8 +9,7 @@ script:
   - go build
   - go test
   - go test -bench=. -cpuprofile=cpu.prof -memprofile=mem.prof
-  - go tool pprof -svg cpu.prof && go tool pprof -svg mem.prof
-  - mv profile001.svg cpu.svg && mv profile002.svg mem.svg
+  - go tool pprof -svg cpu.prof > cpu.svg && go tool pprof -svg mem.prof > mem.svg
 
 deploy:
   provider: releases
