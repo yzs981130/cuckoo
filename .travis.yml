@@ -1,0 +1,28 @@
+language: go
+go:
+  - 1.15
+
+before_install:
+  - sudo apt-get install graphviz
+
+script:
+  - go build
+  - go test
+  - go test -bench=. -cpuprofile=cpu.prof -memprofile=mem.prof
+  - go tool pprof -svg cpu.prof && go tool pprof -svg mem.prof
+  - mv profile001.svg cpu.svg && mv profile002.svg mem.svg
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_ACCESS_TOKEN
+  skip_cleanup: true
+  file_glob: true
+  file:
+    - cuckoo
+    - cuckoo.test
+    - cpu.prof
+    - mem.prof
+    - cpu.svg
+    - mem.svg
+  on:
+    repo: yzs981130/cuckoo
