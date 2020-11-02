@@ -11,7 +11,7 @@ type Filter struct {
 	// bucketMask: use bitwise-and rather than % len(buckets)
 	bucketMask uint
 
-	mu sync.Mutex
+	mu sync.RWMutex
 
 	hashF       func([]byte, uint64) uint64
 	seed        uint64
@@ -126,4 +126,17 @@ func (f *Filter) getAltIndex(fp uint8, oldIndex uint) uint {
 
 func (f *Filter) LoadFactor() float64 {
 	return float64(f.size) / float64(len(f.buckets)*bucketSize)
+}
+
+
+func (f *Filter) SafeAdd(data []byte) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.Add(data)
+}
+
+func (f *Filter) SafeContain(data []byte) bool {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+	return f.Contain(data)
 }

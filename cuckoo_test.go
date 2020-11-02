@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 	"testing"
 )
 
@@ -164,4 +165,41 @@ func TestDeleteMultipleSame(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestThreadSafe(t *testing.T) {
+	f := New(1000)
+
+	testCases := []struct {
+		item byte
+		want bool
+	}{
+		{1, true},
+		{99, false},
+	}
+
+	var wg sync.WaitGroup
+	for i := byte(0); i < 50; i++ {
+		wg.Add(1)
+		go func(item byte) {
+			defer wg.Done()
+			f.SafeAdd([]byte{item})
+		}(i)
+	}
+
+	for i := byte(0); i < 100; i++ {
+		wg.Add(1)
+		go func(item byte) {
+			defer wg.Done()
+			f.SafeContain([]byte{item})
+		}(i)
+	}
+	wg.Wait()
+
+	for _, tc := range testCases {
+		if got := f.SafeContain([]byte{tc.item}); got != tc.want {
+			t.Errorf("cf.SafeContain(%d) = %v, want %v", tc.item, got, tc.want)
+		}
+	}
+
 }
