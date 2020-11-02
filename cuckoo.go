@@ -1,5 +1,6 @@
 package cuckoo
 
+import "C"
 import (
 	"math/rand"
 	"sync"
@@ -16,6 +17,8 @@ type Filter struct {
 	hashF       func([]byte, uint64) uint64
 	seed        uint64
 	maxKickouts int
+
+	boolRand	boolgen
 }
 
 func New(maxNumKeys uint) *Filter {
@@ -35,6 +38,7 @@ func New(maxNumKeys uint) *Filter {
 		maxKickouts: 500,
 		seed:        1337,
 		hashF:       metroHash,
+		boolRand: 	 boolgen{src: rand.NewSource(1)},
 	}
 }
 
@@ -63,10 +67,10 @@ func (f *Filter) Add(data []byte) bool {
 	}
 
 	// cuckoo
-	i := [2]uint{id1, id2}[rand.Intn(2)]
+	i := [2]uint{id1, id2}[f.boolRand.Bool()]
 	for k := 0; k < f.maxKickouts; k++ {
 		// random pick
-		j := rand.Intn(bucketSize)
+		j := f.boolRand.Bool() << 1 & f.boolRand.Bool()
 		f.buckets[i][j], fp = fp, f.buckets[i][j]
 		i = f.getAltIndex(fp, i)
 		if f.insert(i, fp) {
