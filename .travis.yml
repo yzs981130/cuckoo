@@ -17,7 +17,6 @@ deploy:
   skip_cleanup: true
   file_glob: true
   file:
-    - cuckoo
     - cuckoo.test
     - cpu.prof
     - mem.prof
