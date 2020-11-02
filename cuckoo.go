@@ -1,6 +1,5 @@
 package cuckoo
 
-import "C"
 import (
 	"math/rand"
 	"sync"
@@ -18,7 +17,8 @@ type Filter struct {
 	seed        uint64
 	maxKickouts int
 
-	boolRand	boolgen
+	boolRand boolgen
+	fp       []byte
 }
 
 func New(maxNumKeys uint) *Filter {
@@ -38,7 +38,8 @@ func New(maxNumKeys uint) *Filter {
 		maxKickouts: 500,
 		seed:        1337,
 		hashF:       metroHash,
-		boolRand: 	 boolgen{src: rand.NewSource(1)},
+		boolRand:    boolgen{src: rand.NewSource(1)},
+		fp:          make([]byte, 1),
 	}
 }
 
@@ -119,7 +120,8 @@ func (f *Filter) getIndexAndFingerprint(data []byte) (uint, uint8) {
 // getAltIndex returns alt index of given fingerprint and id1
 // (hash(x) \xor hash(fp)) % len(buckets)
 func (f *Filter) getAltIndex(fp uint8, oldIndex uint) uint {
-	return (oldIndex ^ uint(f.hashF([]byte{fp}, f.seed))) & f.bucketMask
+	f.fp[0] = fp
+	return (oldIndex ^ uint(f.hashF(f.fp, f.seed))) & f.bucketMask
 }
 
 func (f *Filter) LoadFactor() float64 {

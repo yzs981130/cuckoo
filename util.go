@@ -35,7 +35,6 @@ func tagHash(hash_ uint64) uint8 {
 	return uint8(hash_%255-1) + 1
 }
 
-
 type boolgen struct {
 	src       rand.Source
 	cache     int64
@@ -47,7 +46,7 @@ func (b *boolgen) Bool() int {
 		b.cache, b.remaining = b.src.Int63(), 63
 	}
 
-	result := b.cache&0x01
+	result := b.cache & 0x01
 	b.cache >>= 1
 	b.remaining--
 
