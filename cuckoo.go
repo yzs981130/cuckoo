@@ -29,12 +29,12 @@ func New(maxNumKeys uint) *Filter {
 
 	bucket := make([]bucket, numBuckets)
 	return &Filter{
-		buckets:    bucket,
-		size:       0,
-		bucketMask: numBuckets - 1,
+		buckets:     bucket,
+		size:        0,
+		bucketMask:  numBuckets - 1,
 		maxKickouts: 500,
-		seed: 1337,
-		hashF: metroHash,
+		seed:        1337,
+		hashF:       metroHash,
 	}
 }
 
